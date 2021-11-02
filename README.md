@@ -1,5 +1,8 @@
 # INF368-Final-Project
 Final project for INF368
 
+## Papers
+- [Do Not Have Enough Data? Deep Learning to the Rescue!](https://arxiv.org/pdf/1911.03118.pdf)
+- [RMDL: Random Multimodel Deep Learning for Classification](https://arxiv.org/pdf/1805.01890v2.pdf)
 
 data: http://ai.stanford.edu/~amaas/data/sentiment/
