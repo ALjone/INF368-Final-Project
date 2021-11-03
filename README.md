@@ -6,4 +6,4 @@ Final project for INF368
 - [RMDL: Random Multimodel Deep Learning for Classification](https://arxiv.org/pdf/1805.01890v2.pdf)
 
 ## Data
-[IMDB](http://ai.stanford.edu/~amaas/data/sentiment/)
+[IMDB data set](http://ai.stanford.edu/~amaas/data/sentiment/) contains 50,000 documents with 2 categories.
