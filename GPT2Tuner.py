@@ -96,9 +96,8 @@ class GPT2Tuner:
                                         top_p=0.90, 
                                         num_return_sequences=num_to_gen
                                         )
-            #for i, sample_output in enumerate(sample_outputs):
-            #print("{}: {}".format(i, tokenizer.decode(sample_output, skip_special_tokens=True)))
+
             with open(path, "a") as f:
                 for sample_output in sample_outputs:
-                    f.write(self.tokenizer.decode(sample_output, skip_special_tokens=True)+"\n")
+                    f.write(self.tokenizer.decode(sample_output, skip_special_tokens=True).replace("\n", "")+"\n")
         print("Done")
