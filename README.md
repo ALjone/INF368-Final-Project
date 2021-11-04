@@ -7,3 +7,6 @@ Final project for INF368
 
 ## Data
 [IMDB data set](http://ai.stanford.edu/~amaas/data/sentiment/) contains 50,000 documents with 2 categories.
+
+## Sources
+https://github.com/mcelikkaya/medium_articles/blob/main/gtp2_training.ipynb
