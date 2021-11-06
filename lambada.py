@@ -6,7 +6,7 @@ import random
 class Classifier:
     def __init__(self, data_path) -> None:
         pass
-    
+     
     def train_epoch(self):
         pass
 
@@ -33,6 +33,7 @@ class Lambada:
         with open(self.save_path, "r") as file:
             sentences = file.readlines()
         
+        #TODO get the X best of each label, not just top X best total
         labels = []
         cleaned_sentences = []
         for sentence in sentences:
