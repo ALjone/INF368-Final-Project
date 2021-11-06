@@ -13,7 +13,7 @@ from transformers import GPT2Tokenizer
 import gc
 
 class GPT2Tuner:
-    def __init__(self, data_path, device = torch.device("cpu"), batch_size: int = 8, bos: str = '<bos>',
+    def __init__(self, data_path, device = torch.device("cpu"), batch_size: int = 4, bos: str = '<bos>',
                 eos: str = '<eos>', pad: str = '<pad>', cleaning: List = ["\r", "\n", "<br />"]) -> None:
         self.cleaning = cleaning
         self.bos = bos
@@ -41,7 +41,7 @@ class GPT2Tuner:
 
     def __clean_data(self, data_path):
         sentences = []
-        labels = set()
+        labels = []
         df = pd.read_csv(data_path)
         for text, label in zip(df.iloc[:,0], df.iloc[:,1]):
             sentences.append(str(label) + self.bos + str(text) + self.eos)
@@ -49,7 +49,7 @@ class GPT2Tuner:
 
         for cleaning in self.cleaning:
             sentences = [s.replace(cleaning, "") for s in sentences]
-        return sentences, list(labels)
+        return sentences, list(set(labels))
 
 
     def __format_time(self, elapsed):
@@ -68,7 +68,7 @@ class GPT2Tuner:
         total_train_loss = 0
         self.model.train()
         for batch in self.train_dataloader:
-                
+
                 self.model.zero_grad()        
                 outputs = self.__process_one_batch( batch)
                 loss = outputs[0]  
@@ -89,7 +89,7 @@ class GPT2Tuner:
         gc.collect()
         self.model.eval()
         for label in self.labels:
-            input_seq = label + + " " + self.bos
+            input_seq = label + " " + self.bos
             generated = torch.tensor(self.tokenizer.encode(input_seq)).unsqueeze(0)
             generated = generated.to(self.device)
             sample_outputs = self.model.generate(
