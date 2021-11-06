@@ -1,3 +1,4 @@
+from typing import List
 import warnings
 warnings.filterwarnings('ignore')
 import pandas as pd
@@ -12,13 +13,15 @@ from transformers import GPT2Tokenizer
 import gc
 
 class GPT2Tuner:
-    def __init__(self, data_path, device = torch.device("cpu"), batch_size: int = 8, bos: str = '<bos>', eos: str = '<eos>', pad: str = '<pad>') -> None:
+    def __init__(self, data_path, device = torch.device("cpu"), batch_size: int = 8, bos: str = '<bos>',
+                eos: str = '<eos>', pad: str = '<pad>', cleaning: List = ["\r", "\n", "<br />"]) -> None:
+        self.cleaning = cleaning
         self.bos = bos
         self.eos = eos
         self.pad = pad
 
         self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2', bos_token=bos, eos_token=eos, pad_token=pad)
-        self.sentences = self.__clean_data(data_path)
+        self.sentences, self.labels = self.__clean_data(data_path)
 
         self.max_len = max([len(self.tokenizer.encode(s)) for s in self.sentences])
 
@@ -32,20 +35,21 @@ class GPT2Tuner:
         self.model.resize_token_embeddings(len(self.tokenizer))
 
         self.device = device
-        self.optimizer = torch.optim.Adam(self.model.parameters(),lr = 0.0005)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.0005)
         self.model.to(device)
 
 
     def __clean_data(self, data_path):
         sentences = []
+        labels = set()
         df = pd.read_csv(data_path)
         for text, label in zip(df.iloc[:,0], df.iloc[:,1]):
             sentences.append(str(label) + self.bos + str(text) + self.eos)
+            labels.append(label)
 
-        sentences = [s.replace("\r","") for s in sentences]
-        sentences = [s.replace("\n","") for s in sentences]
-        sentences = [s.replace("<br />","") for s in sentences]
-        return sentences
+        for cleaning in self.cleaning:
+            sentences = [s.replace(cleaning, "") for s in sentences]
+        return sentences, list(labels)
 
 
     def __format_time(self, elapsed):
@@ -55,7 +59,7 @@ class GPT2Tuner:
         b_input_ids = batch[0].to(self.device)
         b_labels = batch[0].to(self.device)
         b_masks = batch[1].to(self.device)
-        outputs  = self.model(b_input_ids,  attention_mask = b_masks,labels=b_labels)
+        outputs  = self.model(b_input_ids,  attention_mask = b_masks, labels=b_labels)
         return outputs
 
     def train_epoch(self):
@@ -81,11 +85,11 @@ class GPT2Tuner:
         print("elapsed time for 1 training epoch : ",elapsed_time)
 
     
-    def save_sentences(self, keywords, num_to_gen, path = "samples.txt"):
+    def save_sentences(self, num_to_gen, path = "samples.txt"):
         gc.collect()
         self.model.eval()
-        for keyword in keywords:
-            input_seq = keyword + " <sos>"
+        for label in self.labels:
+            input_seq = label + + " " + self.bos
             generated = torch.tensor(self.tokenizer.encode(input_seq)).unsqueeze(0)
             generated = generated.to(self.device)
             sample_outputs = self.model.generate(
@@ -100,4 +104,3 @@ class GPT2Tuner:
             with open(path, "a") as f:
                 for sample_output in sample_outputs:
                     f.write(self.tokenizer.decode(sample_output, skip_special_tokens=True).replace("\n", "")+"\n")
-        print("Done")
