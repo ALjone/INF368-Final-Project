@@ -307,7 +307,7 @@ class GanBert():
                                                     num_warmup_steps = num_warmup_steps)
     
         # For each epoch...
-        for epoch_i in range(0, 1):
+        for epoch_i in range(0, self.num_train_epochs):
             # ========================================
             #               Training
             # ========================================
