@@ -244,24 +244,28 @@ class Bert:
     self.__train(train_ds,learning_rate,batch_size = batch_size,epochs=epochs)
 
 
-  def __predict_proba(self,X, batch_size=None):
+  def __predict_proba(self,X, batch_size=1):
     X = tf.data.Dataset.from_tensor_slices(X)
 
-    if batch_size is not None:
-      X = X.batch(batch_size)
+
+    X = X.batch(batch_size)
 
     X = X.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
     return self.model.predict(X)
 
-  def predict_label_proba(self,X, batch_size=None):
+  def predict_label_proba(self,X, batch_size=1):
     y_pred = self.__predict_proba(X,batch_size=batch_size)
     prop = y_pred.max(axis=-1)
     lab =  np.array(list(map(lambda x:self.class_names.to_numpy()[x] ,y_pred.argmax(axis=-1)))) 
 
     return list(zip(lab,prop))
 
-  def predict(self,X, batch_size=None):
+  def predict(self,X, batch_size=1):
     return self.__predict_proba(X,batch_size=batch_size).argmax(axis=-1)
+
+    
+
+
 
     
 
