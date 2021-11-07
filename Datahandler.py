@@ -85,6 +85,17 @@ class Get_IMDB_data():
 
         return data
 
+if __name__ == "__main__":
+    
+    if not os.path.exists('data'):
+      os.mkdir("./data")
+      url = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
+      import tensorflow as tf
+      dataset = tf.keras.utils.get_file('aclImdb_v1.tar.gz', url,
+                                          untar=True, cache_dir='.',
+                                          cache_subdir='')
 
-get_IMDB_data = Get_IMDB_data("data/aclImdb", 6000,500)
-get_IMDB_data.create_datasets(0.02)
+      dataset_dir = os.path.join(os.path.dirname(dataset), 'aclImdb')
+      get_IMDB_data = Get_IMDB_data("aclImdb", 6000,500)
+      get_IMDB_data.create_datasets(0.02)
+    
