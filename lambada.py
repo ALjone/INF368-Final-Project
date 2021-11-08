@@ -4,23 +4,11 @@ import torch
 import random
 from Bert import Bert
 import gc
-
-class Classifier:
-    def __init__(self, data_path) -> None:
-        pass
-     
-    def train_epoch(self):
-        pass
-
-    def predict(self, dataPoint):
-        l = ["neg", "pos"]
-        random.shuffle(l)
-        return (l[0], random.random())
+import argparse
 
 class Lambada:
     def __init__(self, data_path: str, batch_size: int = 1, device: torch.device = torch.device("cuda"), G_epochs: int = 20, h_epochs: int = 20, sentences_per_label: int = 100, save_path: str = "samples.txt") -> None:
         G = GPT2Tuner(data_path, device = device, batch_size=batch_size)
-        self.h = Classifier(2)
         self.data_path = data_path
         self.save_path = save_path
         self.h_epochs = h_epochs
@@ -62,3 +50,25 @@ class Lambada:
         else:
             print("Not enough correct labels synthesized, returning what little we have")
             return candidates
+
+
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser(description='parameters', prefix_chars='-')
+	parser.add_argument('--train_data_path', default='./data/classification.csv', help='Data path of training file')
+	parser.add_argument('--val_data_path', default='./data/classification.csv', help='Data path of validation file')
+	parser.add_argument('--output_dir', default='./model/lambada/cls', help='Model output directory')
+
+	parser.add_argument('--model_name', default='roberta-base', help='Model name')
+	parser.add_argument('--model_type', default='roberta', help='Model type')
+	parser.add_argument('--max_length', default=300, type=int, help='Max length of text')
+	parser.add_argument('--train_batch_size', default=8, type=int, help='Batch size')
+	parser.add_argument('--eval_batch_size', default=8, type=int, help='Batch size')
+
+	parser.add_argument('--device', default='cpu', help='Device')
+	parser.add_argument('--num_epoch', default=2, type=int, help='Num of epoch')
+	
+
+	args = parser.parse_args()
+
+	main(args)

@@ -4,7 +4,7 @@ warnings.filterwarnings('ignore')
 import pandas as pd
 import torch
 from customDataset import customDataset
-
+import argparse
 import time
 import datetime
 from transformers import GPT2LMHeadModel, GPT2Config
@@ -12,8 +12,9 @@ from torch.utils.data import DataLoader, RandomSampler
 from transformers import GPT2Tokenizer
 import gc
 
+
 class GPT2Tuner:
-    def __init__(self, data_path, device = torch.device("cpu"), batch_size: int = 8, bos: str = '<bos>',
+    def __init__(self, data_path, device = "cpu", batch_size: int = 4, bos: str = '<bos>',
                 eos: str = '<eos>', pad: str = '<pad>', cleaning: List = ["\r", "\n", "<br />"]) -> None:
         self.cleaning = cleaning
         self.bos = bos
@@ -35,7 +36,7 @@ class GPT2Tuner:
         self.model = GPT2LMHeadModel.from_pretrained("gpt2", config=self.configuration)
         self.model.resize_token_embeddings(len(self.tokenizer))
 
-        self.device = device
+        self.device = torch.device(device)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.0005)
         self.model.to(device)
 
@@ -66,6 +67,7 @@ class GPT2Tuner:
 
     def train(self, epochs):
         gc.collect()
+
         self.model.train()
         for _ in range(epochs):
             t0 = time.time()
@@ -106,4 +108,23 @@ class GPT2Tuner:
 
             with open(path, "a") as f:
                 for sample_output in sample_outputs:
-                    f.write(self.tokenizer.decode(sample_output).replace("\n", "")+"\n")
+                    f.write(self.tokenizer.decode(sample_output, skip_special_tokens=True).replace("\n", "")+"\n")
+
+
+if __name__ == '__main__':
+    print("???")
+    parser = argparse.ArgumentParser(description='parameters', prefix_chars='-')
+    parser.add_argument('--train_data_path', default='./data/training_subdata.csv', help='Data path of training file')
+    parser.add_argument('--output_dir', default='./model/lambada/cls', help='Sample output directory')
+
+    parser.add_argument('--output_name', default='samples.txt', help='Sample file name')
+    parser.add_argument('--device', default='CPU', help='CPU or cuda')
+    parser.add_argument('--batch_size', default='8', help='Batch size for training')
+    parser.add_argument('--epochs', default='2', help='Number of epochs')
+    parser.add_argument('--samples_per_class', default='100', help='Number of datapoints to genereate for each class')
+
+    args = parser.parse_args()
+
+    tuner = GPT2Tuner(data_path=args.train_data_path, device = args.device, batch_size=args.batch_size)
+    tuner.train(args.epochs)
+    tuner.save_sentences(args.samples_per_class, path=args.output_dir + "/" + args.output_name)
