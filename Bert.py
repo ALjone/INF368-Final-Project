@@ -200,11 +200,13 @@ class Bert:
 
   def data_preprocessing(self,X,y,batch_size):
     if isinstance(X, np.ndarray):
-      X =pd.DataFrame(X, columns=["text"])
+      X =pd.DataFrame(X)
     if isinstance(y, np.ndarray):
-      y =pd.DataFrame(X, columns=["label"])
+      y =pd.DataFrame(y)
   
-    data = pd.DataFrame([X,y])
+    data = pd.concat([X,y],axis=1)
+    data.columns = ["text","label"]
+
     
     return self.__data_preprocessing(data,batch_size)
 
