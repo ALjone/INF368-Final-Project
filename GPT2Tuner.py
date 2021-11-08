@@ -66,10 +66,10 @@ class GPT2Tuner:
 
     def train(self, epochs):
         gc.collect()
-        t0 = time.time()
-        total_train_loss = 0
         self.model.train()
         for _ in range(epochs):
+            t0 = time.time()
+            total_train_loss = 0
             for batch in self.train_dataloader:
                     
                     self.model.zero_grad()        
