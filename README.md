@@ -9,7 +9,7 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
 ## Data
 [IMDB data set](http://ai.stanford.edu/~amaas/data/sentiment/) contains 50,000 documents with 2 categories.
 
-## setup
+## Setup
 | variable  | value   |
 |---|---|
 | # per label  | 5, 10, 25, 50  |
