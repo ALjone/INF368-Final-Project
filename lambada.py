@@ -21,6 +21,7 @@ class Lambada:
     def __init__(self, data_path: str, batch_size: int = 1, device: torch.device = torch.device("cuda"), G_epochs: int = 20, h_epochs: int = 20, sentences_per_label: int = 100, save_path: str = "samples.txt") -> None:
         G = GPT2Tuner(data_path, device = device, batch_size=batch_size)
         self.h = Classifier(2)
+        self.data_path = data_path
         self.save_path = save_path
         self.h_epochs = h_epochs
         self.sentences_per_label = sentences_per_label

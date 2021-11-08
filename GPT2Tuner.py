@@ -42,7 +42,7 @@ class GPT2Tuner:
 
     def __clean_data(self, data_path):
         sentences = []
-        labels = set()
+        labels = []
         df = pd.read_csv(data_path)
         for text, label in zip(df.iloc[:,0], df.iloc[:,1]):
             sentences.append(str(label) + self.bos + str(text) + self.eos)
@@ -51,7 +51,7 @@ class GPT2Tuner:
         for cleaning in self.cleaning:
             sentences = [s.replace(cleaning, "") for s in sentences]
 
-        return sentences, list(labels)
+        return sentences, list(set(labels))
 
 
     def __format_time(self, elapsed):
