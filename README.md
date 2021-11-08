@@ -9,6 +9,14 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
 ## Data
 [IMDB data set](http://ai.stanford.edu/~amaas/data/sentiment/) contains 50,000 documents with 2 categories.
 
+## setup
+| variable  | value   |
+|---|---|
+| # per label  | 5, 10, 25, 50  |
+| batch size  |  5 |
+| learning rate |  5e-4 |
+| seed  | 0  |
+
 ## Sources
 - https://github.com/mcelikkaya/medium_articles/blob/main/gtp2_training.ipynb
 - https://github.com/crux82/ganbert-pytorch
