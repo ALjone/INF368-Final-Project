@@ -12,3 +12,4 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
 ## Sources
 - https://github.com/mcelikkaya/medium_articles/blob/main/gtp2_training.ipynb
 - https://github.com/crux82/ganbert-pytorch
+- https://www.tensorflow.org/text/tutorials/classify_text_with_bert#about_bert
