@@ -92,7 +92,7 @@ class GPT2Tuner:
         gc.collect()
         self.model.eval()
         for label in self.labels:
-            input_seq = label + + " " + self.bos
+            input_seq = label + " " + self.bos
             generated = torch.tensor(self.tokenizer.encode(input_seq)).unsqueeze(0)
             generated = generated.to(self.device)
             sample_outputs = self.model.generate(
