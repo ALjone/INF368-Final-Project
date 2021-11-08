@@ -44,9 +44,9 @@ class Lambada:
         labels = []
         cleaned_sentences = []
         for sentence in sentences:
-            sentence_parts = sentence.split(maxsplit = 1)
-            labels.append(sentence_parts[0])
-            cleaned_sentences.append(sentence_parts[1])
+            #sentence_parts = sentence.split(maxsplit = 1)
+            labels.append(sentence[:3])
+            cleaned_sentences.append(sentence[3:])
 
         df = pd.DataFrame(columns=["Sentence", "True label", "Predicted label", "Confidence"])
         for label, sentence in zip(labels, cleaned_sentences):

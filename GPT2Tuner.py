@@ -106,4 +106,4 @@ class GPT2Tuner:
 
             with open(path, "a") as f:
                 for sample_output in sample_outputs:
-                    f.write(self.tokenizer.decode(sample_output, skip_special_tokens=True).replace("\n", "")+"\n")
+                    f.write(self.tokenizer.decode(sample_output).replace("\n", "")+"\n")
