@@ -112,7 +112,6 @@ class GPT2Tuner:
 
 
 if __name__ == '__main__':
-    print("???")
     parser = argparse.ArgumentParser(description='parameters', prefix_chars='-')
     parser.add_argument('--train_data_path', default='/data/training_subdata.csv', help='Data path of training file')
     parser.add_argument('--output_dir', default='/data/', help='Sample output directory')
@@ -126,5 +125,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     tuner = GPT2Tuner(data_path=args.train_data_path, device = args.device, batch_size=int(args.batch_size))
+    print("Starting training:")
     tuner.train(int(args.epochs))
     tuner.save_sentences(args.samples_per_class, path=args.output_dir + "/" + args.output_name)
