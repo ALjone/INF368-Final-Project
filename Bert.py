@@ -1,6 +1,3 @@
-# A dependency of the preprocessing for BERT inputs
-!pip install -q -U tensorflow-text
-!pip install -q tf-models-official
 import os
 
 
