@@ -118,7 +118,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', default='/data/', help='Sample output directory')
 
     parser.add_argument('--output_name', default='generated_samples.txt', help='Sample file name')
-    parser.add_argument('--device', default='CPU', help='CPU or cuda')
+    parser.add_argument('--device', default='cpu', help='cpu or cuda')
     parser.add_argument('--batch_size', default='8', help='Batch size for training')
     parser.add_argument('--epochs', default='2', help='Number of epochs')
     parser.add_argument('--samples_per_class', default='100', help='Number of datapoints to genereate for each class')
@@ -126,5 +126,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     tuner = GPT2Tuner(data_path=args.train_data_path, device = args.device, batch_size=int(args.batch_size))
-    tuner.train(args.epochs)
+    tuner.train(int(args.epochs))
     tuner.save_sentences(args.samples_per_class, path=args.output_dir + "/" + args.output_name)
