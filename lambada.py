@@ -3,6 +3,7 @@ import pandas as pd
 import torch
 import random
 from Bert import Bert
+import gc
 
 class Classifier:
     def __init__(self, data_path) -> None:
@@ -18,17 +19,20 @@ class Classifier:
 
 class Lambada:
     def __init__(self, data_path: str, batch_size: int = 1, device: torch.device = torch.device("cuda"), G_epochs: int = 20, h_epochs: int = 20, sentences_per_label: int = 100, save_path: str = "samples.txt") -> None:
-        self.G = GPT2Tuner(data_path, device = device, batch_size=batch_size)
-        self.h = Bert(2)
+        G = GPT2Tuner(data_path, device = device, batch_size=batch_size)
+        self.h = Classifier(2)
         self.save_path = save_path
+        self.h_epochs = h_epochs
         self.sentences_per_label = sentences_per_label
-        self.h.train_from_path(data_path, 0.01, epochs=h_epochs)
-        self.G.train(G_epochs)
+        G.train(G_epochs)
         for _ in range(int((sentences_per_label*10)/50)):
-            self.G.save_sentences(50, save_path)
-
+            G.save_sentences(50, save_path)
+        gc.collect()
     
     def get_sentences(self):
+        h = Bert(2)
+        h.train_from_path(self.data_path, 0.001, epochs=self.h_epochs)
+
         with open(self.save_path, "r") as file:
             sentences = file.readlines()
         
@@ -45,7 +49,7 @@ class Lambada:
 
         df = pd.DataFrame(columns=["Sentence", "True label", "Predicted label", "Confidence"])
         for label, sentence in zip(labels, cleaned_sentences):
-            predictions = self.h.predict(sentence)
+            predictions = h.predict(sentence)
             new_row = {"Sentence": sentence, "True label": label, "Predicted label" : predictions[0], "Confidence" : predictions[1]}
             df = df.append(new_row, ignore_index=True)
         
