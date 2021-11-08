@@ -114,10 +114,10 @@ class GPT2Tuner:
 if __name__ == '__main__':
     print("???")
     parser = argparse.ArgumentParser(description='parameters', prefix_chars='-')
-    parser.add_argument('--train_data_path', default='./data/training_subdata.csv', help='Data path of training file')
-    parser.add_argument('--output_dir', default='./model/lambada/cls', help='Sample output directory')
+    parser.add_argument('--train_data_path', default='/data/training_subdata.csv', help='Data path of training file')
+    parser.add_argument('--output_dir', default='/data/', help='Sample output directory')
 
-    parser.add_argument('--output_name', default='samples.txt', help='Sample file name')
+    parser.add_argument('--output_name', default='generated_samples.txt', help='Sample file name')
     parser.add_argument('--device', default='CPU', help='CPU or cuda')
     parser.add_argument('--batch_size', default='8', help='Batch size for training')
     parser.add_argument('--epochs', default='2', help='Number of epochs')
@@ -125,6 +125,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    tuner = GPT2Tuner(data_path=args.train_data_path, device = args.device, batch_size=args.batch_size)
+    tuner = GPT2Tuner(data_path=args.train_data_path, device = args.device, batch_size=int(args.batch_size))
     tuner.train(args.epochs)
     tuner.save_sentences(args.samples_per_class, path=args.output_dir + "/" + args.output_name)

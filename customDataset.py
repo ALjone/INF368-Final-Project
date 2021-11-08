@@ -1,10 +1,6 @@
-
 import torch
-print(1)
 from torch.utils.data import Dataset 
-print(2)
 from transformers import GPT2Tokenizer
-print(3)
 
 class customDataset(Dataset):
 
