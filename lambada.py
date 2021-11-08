@@ -2,6 +2,7 @@ from GPT2Tuner import GPT2Tuner
 import pandas as pd
 import torch
 import random
+from Bert import Bert
 
 class Classifier:
     def __init__(self, data_path) -> None:
@@ -18,13 +19,11 @@ class Classifier:
 class Lambada:
     def __init__(self, data_path: str, batch_size: int = 1, device: torch.device = torch.device("cuda"), G_epochs: int = 20, h_epochs: int = 20, sentences_per_label: int = 100, save_path: str = "samples.txt") -> None:
         self.G = GPT2Tuner(data_path, device = device, batch_size=batch_size)
-        self.h = Classifier(data_path)
+        self.h = Bert(2)
         self.save_path = save_path
         self.sentences_per_label = sentences_per_label
-        for _ in range(h_epochs):
-            self.h.train_epoch()
-        for _ in range(G_epochs):
-            self.G.train_epoch()
+        self.h.train_from_path(data_path, 0.01, epochs=h_epochs)
+        self.G.train(G_epochs)
         for _ in range(int((sentences_per_label*10)/50)):
             self.G.save_sentences(50, save_path)
 
@@ -34,6 +33,9 @@ class Lambada:
             sentences = file.readlines()
         
         #TODO get the X best of each label, not just top X best total
+
+        #TODO also gather data in dict before putting it in dataframe
+        #https://stackoverflow.com/questions/57000903/what-is-the-fastest-and-most-efficient-way-to-append-rows-to-a-dataframe
         labels = []
         cleaned_sentences = []
         for sentence in sentences:
