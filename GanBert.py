@@ -219,7 +219,7 @@ class GanBert():
         # Format as hh:mm:ss
         return str(datetime.timedelta(seconds=elapsed_rounded)) 
     
-    def get_dataloaders(self,labeled_examples,unlabeled_examples,test_examples):
+    def get_dataloaders(self,labeled_examples,unlabeled_examples,test_examples,label_list):
         label_map = {}
         for (i, label) in enumerate(label_list):
             label_map[label] = i
@@ -295,7 +295,7 @@ class GanBert():
         gen_optimizer = torch.optim.AdamW(g_vars, lr=self.learning_rate_generator) 
 
         # data loaders
-        train_dataloader,test_dataloader = self.get_dataloaders(labeled_examples,unlabeled_examples,test_examples)
+        train_dataloader,test_dataloader = self.get_dataloaders(labeled_examples,unlabeled_examples,test_examples,label_list)
 
         #scheduler
         if self.apply_scheduler:
