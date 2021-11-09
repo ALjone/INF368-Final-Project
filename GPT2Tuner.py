@@ -7,6 +7,8 @@ from customDataset import customDataset
 import argparse
 import time
 import datetime
+import numpy as np
+import random
 from transformers import GPT2LMHeadModel, GPT2Config
 from torch.utils.data import DataLoader, RandomSampler
 from transformers import GPT2Tokenizer
@@ -113,18 +115,29 @@ class GPT2Tuner:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='parameters', prefix_chars='-')
-    parser.add_argument('--train_data_path', default='/data/training_subdata.csv', help='Data path of training file')
-    parser.add_argument('--output_dir', default='/data/', help='Sample output directory')
+    parser.add_argument('--train_data_path', default='./data/training_subdata.csv', help='Data path of training file')
+    parser.add_argument('--output_dir', default='./data', help='Sample output directory')
 
     parser.add_argument('--output_name', default='generated_samples.txt', help='Sample file name')
     parser.add_argument('--device', default='cpu', help='cpu or cuda')
     parser.add_argument('--batch_size', default='8', help='Batch size for training')
     parser.add_argument('--epochs', default='2', help='Number of epochs')
     parser.add_argument('--samples_per_class', default='100', help='Number of datapoints to genereate for each class')
+    parser.add_argument('--torch_seed', default='None', help='Seed to set with torch')
+    parser.add_argument('--numpy_seed', default='None', help='Seed to set with numpy')
+    parser.add_argument('--random_seed', default='None', help='Seed to set with random')
 
     args = parser.parse_args()
+    if args.torch_seed != "None":
+        torch.manual_seed(int(args.torch_seed))
+    if args.numpy_seed != "None":
+        np.random.seed(int(args.numpy_seed))
+    if args.random_seed != "None":
+        random.seed(int(args.random_seed))
 
     tuner = GPT2Tuner(data_path=args.train_data_path, device = args.device, batch_size=int(args.batch_size))
     print("Starting training:")
     tuner.train(int(args.epochs))
+    print("Generating sentences")
     tuner.save_sentences(int(args.samples_per_class), path=args.output_dir + "/" + args.output_name)
+    print("Finished generating sentences.")
