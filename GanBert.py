@@ -258,6 +258,8 @@ class GanBert():
         hidden_levels_g = [hidden_size for i in range(0, self.num_hidden_layers_g)]
         hidden_levels_d = [hidden_size for i in range(0, self.num_hidden_layers_d)]
         
+        label_list = {x[1] for x in labeled_examples+unlabeled_examples+test_examples}
+        
         #-------------------------------------------------
         #   Instantiate the Generator and Discriminator
         #-------------------------------------------------
