@@ -182,8 +182,7 @@ class Bert:
   def plot_model(self):
     return tf.keras.utils.plot_model(self.model)
 
-
-    def __data_preprocessing(self,data,batch_size):
+  def __data_preprocessing(self,data,batch_size):
     self.class_names = pd.factorize(data.label)[1]
     data.label = pd.factorize(data.label)[0]
 
