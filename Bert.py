@@ -187,7 +187,7 @@ class Bert:
     data.label = pd.factorize(data.label)[0]
 
     data = tf.data.Dataset.from_tensor_slices((data.text, data.label))
-    if self.random_state) is not None:
+    if self.random_state is not None:
       data = data.shuffle(len(data.label),self.random_state)
     else:
       data = data.shuffle(len(data.label))
