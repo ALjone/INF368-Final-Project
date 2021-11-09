@@ -156,6 +156,7 @@ class Bert:
           'https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3'}
 
     if random_state is not None:
+      self.random_state = random_state
       np.random.seed(random_state)
       tf.random.set_seed(random_state)
 
