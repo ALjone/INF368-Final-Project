@@ -2,55 +2,74 @@ import numpy as np
 import pandas as pd
 import os
 import re
-from sklearn.model_selection import train_test_split
-seed_val = 0
+
 
 class Get_IMDB_data():
     
-    def __init__(self,path, subset_size_train = None,subset_size_test = None, random_state = None):
-        self.path = path
-        self.subset_size = [subset_size_train,subset_size_test]
-        self.random_state = random_state
+    def __init__(self,path,  random_state = None):
+      self.path = path
+      self.random_state = random_state
         
     def to_gan_bert(self,train,test, pct):
-        labeled, unlabeled = train_test_split(train, test_size= 1-pct , random_state=self.random_state, stratify = train.label)
-        
-        labeled = list(zip(labeled.iloc[:,0],labeled.iloc[:,1]))
-        
-        unlabeled = list(zip(unlabeled.iloc[:,0],["blank"]*unlabeled.shape[0]))
-        
-        test = list(zip(test.iloc[:,0],test.iloc[:,1]))
+      labeled, unlabeled = train_test_split(train, test_size= 1-pct , random_state=self.random_state, stratify = train.label)
+      
+      labeled = list(zip(labeled.iloc[:,0],labeled.iloc[:,1]))
+      
+      unlabeled = list(zip(unlabeled.iloc[:,0],["blank"]*unlabeled.shape[0]))
+      
+      test = list(zip(test.iloc[:,0],test.iloc[:,1]))
 
-        return labeled, unlabeled, test
+      return labeled, unlabeled, test
 
-    def create_datasets(self, label_pct = 0.2):
-        train_data,test = self.get_data()
-        labeled, unlabeled = train_test_split(train_data, test_size= 1-label_pct,
-                                            random_state=self.random_state, stratify = train_data.label)
-        unlabeled = unlabeled.copy()
-        unlabeled.loc[:,"label"] = "blank"
-        labeled.to_csv("data/train_labeled.csv",index=False)
-        unlabeled.to_csv("data/train_unlabeled.csv",index=False)
-        test.to_csv("data/test.csv",index=False)
+    def create_datasets(self, labeled_size = 100,unlabeled_size = 5000,test_size = 500):
+
+      labeled,unlabeled,test = self.get_data(labeled_size,unlabeled_size,test_size)
+      
+      unlabeled = unlabeled.copy()
+      unlabeled.loc[:,"label"] = "blank"
+      for k,v in labeled.items():
+        v.to_csv(f"data/train_labeled_{k}.csv",index=False)
+      unlabeled.to_csv("data/train_unlabeled.csv",index=False)
+      test.to_csv("data/test.csv",index=False)
 
         
     
-    def get_data(self):
+    def get_data(self,labeled_size,unlabeled_size,test_size):
         
+        if isinstance(labeled_size,int):
+          labeled_sizes = [labeled_size]
+        elif isinstance(labeled_size,list):
+          labeled_sizes = labeled_size
         
+        for labeled_size in labeled_sizes:
+          if !isinstance(labeled_size,int):
+            raise Exception("labeled_size must be a int or a list of ints")
+        
+        labeled ={}
+        labeled_sizes.sort(reverse=True)
+        labeled_size = labeled_sizes[0]
         path_neg_train = self.path+'/train/neg'
         path_pos_train = self.path+'/train/pos'
-        
-        train_data = pd.concat([self.__get_data(path_neg_train,"neg",self.subset_size[0]),
-                                self.__get_data(path_pos_train,"pos",self.subset_size[0])], axis = 0)
+        train_size = labeled_size + unlabeled_size//2
+
+        neg = self.__get_data(path_neg_train,"neg",train_size)
+        pos = self.__get_data(path_pos_train,"pos",train_size)
+
+        labeled[labeled_size] = pd.concat([neg[:labeled_size],pos[:labeled_size]], axis = 0)
+        unlabeled = pd.concat([neg[labeled_size:],pos[labeled_size:]], axis = 0)
+
+   
+
+        for labeled_size in labeled_sizes[1:]:
+          labeled[labeled_size] = pd.concat([neg[:labeled_size],pos[:labeled_size]], axis = 0)
         
         path_neg_test = self.path+'/test/neg'
         path_pos_test = self.path+'/test/pos'
         
-        test_data = pd.concat([self.__get_data(path_neg_test,"neg",self.subset_size[1]),
-                                self.__get_data(path_pos_test,"pos",self.subset_size[1])], axis = 0)
+        test_data = pd.concat([self.__get_data(path_neg_test,"neg",test_size//2),
+                                self.__get_data(path_pos_test,"pos",test_size//2)], axis = 0)
         
-        return train_data,test_data
+        return labeled,unlabeled,test_data
         
         
     
@@ -72,7 +91,7 @@ class Get_IMDB_data():
         if subset_size is not None:
             if subset_size> len(files):
                 raise Exception("Subset_size must be be smaller or equal to the number of text file in the directory")
-            files = np.random.choice(files, subset_size//2, replace = False)
+            files = np.random.choice(files, subset_size, replace = False)
 
         data = pd.DataFrame(None, columns = ["text", "label"])
 
@@ -96,6 +115,5 @@ if __name__ == "__main__":
                                           cache_subdir='')
 
       dataset_dir = os.path.join(os.path.dirname(dataset), 'aclImdb')
-      get_IMDB_data = Get_IMDB_data("aclImdb", 6000,500)
-      get_IMDB_data.create_datasets(0.02)
-    
+      get_IMDB_data = Get_IMDB_data("/content/aclImdb",random_state=0)
+      get_IMDB_data.create_datasets(labeled_size=[5,10,25,50],unlabeled_size= 5000,test_size=500)
