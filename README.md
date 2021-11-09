@@ -17,6 +17,14 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
 | learning rate |  5e-4 |
 | seed  | 0  |
 
+## How to run the analysis
+- Download the notebooks in the "Notebooks" folder and run them in Google Colab.
+ 1. Run Bert.ipynb for the baseline results.     
+ 2. Run GanBert.ipynb for the Gan-Bert results.
+ 3. Run Lambada.ipynb for the Lambada results.     
+ 
+ Note. if one need to generate the data, one can run the GenerateData.ipynb file.  
+
 ## Sources
 - https://github.com/mcelikkaya/medium_articles/blob/main/gtp2_training.ipynb
 - https://github.com/crux82/ganbert-pytorch
