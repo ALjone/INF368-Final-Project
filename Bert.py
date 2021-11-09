@@ -156,6 +156,7 @@ class Bert:
           'https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3'}
 
     if random_state is not None:
+      self.random_state = random_state
       np.random.seed(random_state)
       tf.random.set_seed(random_state)
 
@@ -182,12 +183,15 @@ class Bert:
   def plot_model(self):
     return tf.keras.utils.plot_model(self.model)
 
-
   def __data_preprocessing(self,data,batch_size):
     self.class_names = pd.factorize(data.label)[1]
     data.label = pd.factorize(data.label)[0]
-
+    nrow = data.shape[0]
     data = tf.data.Dataset.from_tensor_slices((data.text, data.label))
+    if self.random_state is not None:
+      data = data.shuffle(nrow,self.random_state)
+    else:
+      data = data.shuffle(nrow)
     data = data.batch(batch_size)
     data = data.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
     return data
@@ -261,6 +265,15 @@ class Bert:
 
   def predict(self,X, batch_size=1):
     return self.__predict_proba(X,batch_size=batch_size).argmax(axis=-1)
+  
+  def evaluate_from_path(self,path):
+    test = self.from_path_data_preprocessing (path=path,batch_size = 1)
+    return self.model.evaluate(test)
+
+  def evaluate(self,data):
+    test = self.__data_preprocessing(data,batch_size=1)
+    return self.model.evaluate(test)
+
 
     
 
