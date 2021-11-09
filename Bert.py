@@ -183,11 +183,15 @@ class Bert:
     return tf.keras.utils.plot_model(self.model)
 
 
-  def __data_preprocessing(self,data,batch_size):
+    def __data_preprocessing(self,data,batch_size):
     self.class_names = pd.factorize(data.label)[1]
     data.label = pd.factorize(data.label)[0]
 
     data = tf.data.Dataset.from_tensor_slices((data.text, data.label))
+    if self.random_state) is not None:
+      data = data.shuffle(len(data.label),self.random_state)
+    else:
+      data = data.shuffle(len(data.label))
     data = data.batch(batch_size)
     data = data.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
     return data
