@@ -537,6 +537,7 @@ class GanBert():
             print("\nTraining complete!")
 
             print("Total training took {:} (h:mm:ss)".format(self.format_time(time.time()-total_t0)))
+            return test_accuracy
         
          
 
