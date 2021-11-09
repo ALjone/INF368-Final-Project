@@ -261,6 +261,15 @@ class Bert:
 
   def predict(self,X, batch_size=1):
     return self.__predict_proba(X,batch_size=batch_size).argmax(axis=-1)
+  
+  def evaluate_from_path(self,path):
+    test = self.from_path_data_preprocessing (path=path,batch_size = 1)
+    return self.model.evaluate(test)
+
+  def evaluate(self,data):
+    test = self.__data_preprocessing(data,batch_size=1)
+    return self.model.evaluate(test)
+
 
     
 
