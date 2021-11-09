@@ -42,7 +42,7 @@ class Get_IMDB_data():
           labeled_sizes = labeled_size
         
         for labeled_size in labeled_sizes:
-          if !isinstance(labeled_size,int):
+          if not isinstance(labeled_size,int):
             raise Exception("labeled_size must be a int or a list of ints")
         
         labeled ={}
