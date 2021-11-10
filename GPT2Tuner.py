@@ -126,6 +126,7 @@ if __name__ == '__main__':
     parser.add_argument('--torch_seed', default='None', help='Seed to set with torch')
     parser.add_argument('--numpy_seed', default='None', help='Seed to set with numpy')
     parser.add_argument('--random_seed', default='None', help='Seed to set with random')
+    parser.add_argument('--repeat_num', default='1', help='Number to repeat sentence generation')
 
     args = parser.parse_args()
     if args.torch_seed != "None":
@@ -139,5 +140,12 @@ if __name__ == '__main__':
     print("Starting training:")
     tuner.train(int(args.epochs))
     print("Generating sentences")
-    tuner.save_sentences(int(args.samples_per_class), path=args.output_dir + "/" + args.output_name)
+    for i in range(int(args.repeat_num)):
+        if args.torch_seed != "None":
+            torch.manual_seed(int(args.torch_seed)+i)
+        if args.numpy_seed != "None":
+            np.random.seed(int(args.numpy_seed)+i)
+        if args.random_seed != "None":
+            random.seed(int(args.random_seed)+i)
+        tuner.save_sentences(int(args.samples_per_class), path=args.output_dir + "/" + args.output_name)
     print("Finished generating sentences.")
