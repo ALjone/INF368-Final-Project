@@ -141,11 +141,5 @@ if __name__ == '__main__':
     tuner.train(int(args.epochs))
     print("Generating sentences")
     for i in range(int(args.repeat_num)):
-        if args.torch_seed != "None":
-            torch.manual_seed(int(args.torch_seed)+i)
-        if args.numpy_seed != "None":
-            np.random.seed(int(args.numpy_seed)+i)
-        if args.random_seed != "None":
-            random.seed(int(args.random_seed)+i)
         tuner.save_sentences(int(args.samples_per_class), path=args.output_dir + "/" + args.output_name)
     print("Finished generating sentences.")
