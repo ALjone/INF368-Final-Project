@@ -426,10 +426,6 @@ class GanBert():
                 gen_optimizer.step()
                 dis_optimizer.step()
 
-                # A detail log of the individual losses
-                #print("{0:.4f}\t{1:.4f}\t{2:.4f}\t{3:.4f}\t{4:.4f}".
-                #      format(D_L_Supervised, D_L_unsupervised1U, D_L_unsupervised2U,
-                #             g_loss_d, g_feat_reg))
 
                 # Save the losses to print them later
                 tr_g_loss += g_loss.item()
@@ -440,98 +436,98 @@ class GanBert():
                     scheduler_d.step()
                     scheduler_g.step()
 
-        # Calculate the average loss over all of the batches.
-        avg_train_loss_g = tr_g_loss / len(train_dataloader)
-        avg_train_loss_d = tr_d_loss / len(train_dataloader)             
+            # Calculate the average loss over all of the batches.
+            avg_train_loss_g = tr_g_loss / len(train_dataloader)
+            avg_train_loss_d = tr_d_loss / len(train_dataloader)             
 
-        # Measure how long this epoch took.
-        training_time = self.format_time(time.time() - t0)
+            # Measure how long this epoch took.
+            training_time = self.format_time(time.time() - t0)
 
-        print("")
-        print("  Average training loss generetor: {0:.3f}".format(avg_train_loss_g))
-        print("  Average training loss discriminator: {0:.3f}".format(avg_train_loss_d))
-        print("  Training epcoh took: {:}".format(training_time))
+            print("")
+            print("  Average training loss generetor: {0:.3f}".format(avg_train_loss_g))
+            print("  Average training loss discriminator: {0:.3f}".format(avg_train_loss_d))
+            print("  Training epcoh took: {:}".format(training_time))
 
-        # ========================================
-        #     TEST ON THE EVALUATION DATASET
-        # ========================================
-        # After the completion of each training epoch, measure our performance on
-        # our test set.
-        print("")
-        print("Running Test...")
+            # ========================================
+            #     TEST ON THE EVALUATION DATASET
+            # ========================================
+            # After the completion of each training epoch, measure our performance on
+            # our test set.
+            print("")
+            print("Running Test...")
 
-        t0 = time.time()
+            t0 = time.time()
 
-        # Put the model in evaluation mode--the dropout layers behave differently
-        # during evaluation.
-        transformer.eval() #maybe redundant
-        discriminator.eval()
-        generator.eval()
+            # Put the model in evaluation mode--the dropout layers behave differently
+            # during evaluation.
+            transformer.eval() #maybe redundant
+            discriminator.eval()
+            generator.eval()
 
-        # Tracking variables 
-        total_test_accuracy = 0
+            # Tracking variables 
+            total_test_accuracy = 0
 
-        total_test_loss = 0
-        nb_test_steps = 0
+            total_test_loss = 0
+            nb_test_steps = 0
 
-        all_preds = []
-        all_labels_ids = []
+            all_preds = []
+            all_labels_ids = []
 
-        #loss
-        nll_loss = torch.nn.CrossEntropyLoss(ignore_index=-1)
+            #loss
+            nll_loss = torch.nn.CrossEntropyLoss(ignore_index=-1)
 
 
-        # Evaluate data for one epoch
-        for batch in test_dataloader:
+            # Evaluate data for one epoch
+            for batch in test_dataloader:
 
-            # Unpack this training batch from our dataloader. 
-            b_input_ids = batch[0].to(self.device)
-            b_input_mask = batch[1].to(self.device)
-            b_labels = batch[2].to(self.device)
+                # Unpack this training batch from our dataloader. 
+                b_input_ids = batch[0].to(self.device)
+                b_input_mask = batch[1].to(self.device)
+                b_labels = batch[2].to(self.device)
 
-            # Tell pytorch not to bother with constructing the compute graph during
-            # the forward pass, since this is only needed for backprop (training).
-            with torch.no_grad():        
-                model_outputs = transformer(b_input_ids, attention_mask=b_input_mask)
-                hidden_states = model_outputs[-1]
-                _, logits, probs = discriminator(hidden_states)
-                ###log_probs = F.log_softmax(probs[:,1:], dim=-1)
-                filtered_logits = logits[:,0:-1]
-                # Accumulate the test loss.
-                total_test_loss += nll_loss(filtered_logits, b_labels)
+                # Tell pytorch not to bother with constructing the compute graph during
+                # the forward pass, since this is only needed for backprop (training).
+                with torch.no_grad():        
+                    model_outputs = transformer(b_input_ids, attention_mask=b_input_mask)
+                    hidden_states = model_outputs[-1]
+                    _, logits, probs = discriminator(hidden_states)
+                    ###log_probs = F.log_softmax(probs[:,1:], dim=-1)
+                    filtered_logits = logits[:,0:-1]
+                    # Accumulate the test loss.
+                    total_test_loss += nll_loss(filtered_logits, b_labels)
 
-            # Accumulate the predictions and the input labels
-            _, preds = torch.max(filtered_logits, 1)
-            all_preds += preds.detach().cpu()
-            all_labels_ids += b_labels.detach().cpu()
+                # Accumulate the predictions and the input labels
+                _, preds = torch.max(filtered_logits, 1)
+                all_preds += preds.detach().cpu()
+                all_labels_ids += b_labels.detach().cpu()
 
-        # Report the final accuracy for this validation run.
-        all_preds = torch.stack(all_preds).numpy()
-        all_labels_ids = torch.stack(all_labels_ids).numpy()
-        test_accuracy = np.sum(all_preds == all_labels_ids) / len(all_preds)
-        print("  Accuracy: {0:.3f}".format(test_accuracy))
+            # Report the final accuracy for this validation run.
+            all_preds = torch.stack(all_preds).numpy()
+            all_labels_ids = torch.stack(all_labels_ids).numpy()
+            test_accuracy = np.sum(all_preds == all_labels_ids) / len(all_preds)
+            print("  Accuracy: {0:.3f}".format(test_accuracy))
 
-        # Calculate the average loss over all of the batches.
-        avg_test_loss = total_test_loss / len(test_dataloader)
-        avg_test_loss = avg_test_loss.item()
+            # Calculate the average loss over all of the batches.
+            avg_test_loss = total_test_loss / len(test_dataloader)
+            avg_test_loss = avg_test_loss.item()
 
-        # Measure how long the validation run took.
-        test_time = self.format_time(time.time() - t0)
+            # Measure how long the validation run took.
+            test_time = self.format_time(time.time() - t0)
 
-        print("  Test Loss: {0:.3f}".format(avg_test_loss))
-        print("  Test took: {:}".format(test_time))
+            print("  Test Loss: {0:.3f}".format(avg_test_loss))
+            print("  Test took: {:}".format(test_time))
 
-        # Record all statistics from this epoch.
-        training_stats.append(
-            {
-                'epoch': epoch_i + 1,
-                'Training Loss generator': avg_train_loss_g,
-                'Training Loss discriminator': avg_train_loss_d,
-                'Valid. Loss': avg_test_loss,
-                'Valid. Accur.': test_accuracy,
-                'Training Time': training_time,
-                'Test Time': test_time
-            })
+            # Record all statistics from this epoch.
+            training_stats.append(
+                {
+                    'epoch': epoch_i + 1,
+                    'Training Loss generator': avg_train_loss_g,
+                    'Training Loss discriminator': avg_train_loss_d,
+                    'Valid. Loss': avg_test_loss,
+                    'Valid. Accur.': test_accuracy,
+                    'Training Time': training_time,
+                    'Test Time': test_time
+                })
 
         for stat in training_stats:
             print(stat)
