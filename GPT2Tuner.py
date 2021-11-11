@@ -107,7 +107,7 @@ class GPT2Tuner:
         #GPT2 takes only 1024 tokens, so we limit the text to 1021
         for text, label in zip(df.iloc[:,0], df.iloc[:,1]):
             label = str(label)
-            sequences.append(str(label) + self.bos + ' '.join(str(text).split()[:1021]) + self.eos)
+            sequences.append(str(label) + self.bos + text + self.eos)
             labels.append(label)
         
         #Clean the sequences

@@ -12,13 +12,18 @@ from transformers import *
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 import pandas as pd
 
-
+# Source
 #------------------------------
 #   The Generator as in 
 #   https://www.aclweb.org/anthology/2020.acl-main.191/
 #   https://github.com/crux82/ganbert
 #------------------------------
+
 class Generator(nn.Module):
+    '''
+     generator model that produces “fake” examples resembling the data distribution. Used togheter with the discrimenator
+     then training the ganbert model. 
+    '''
     def __init__(self, noise_size=100, output_size=512, hidden_sizes=[512], dropout_rate=0.1):
         super(Generator, self).__init__()
         layers = []
@@ -39,6 +44,9 @@ class Generator(nn.Module):
 #   https://github.com/crux82/ganbert
 #------------------------------
 class Discriminator(nn.Module):
+    '''
+    The BERT  model is used as a discriminator. After the training this model is used for predictions
+    '''
     def __init__(self, input_size=512, hidden_sizes=[512], num_labels=2, dropout_rate=0.1):
         super(Discriminator, self).__init__()
         self.input_dropout = nn.Dropout(p=dropout_rate)
@@ -58,8 +66,16 @@ class Discriminator(nn.Module):
         probs = self.softmax(logits)
         return last_rep, logits, probs
 
-
+#------------------------------
+#   GANBERT Model
+#   https://github.com/crux82/ganbert
+#------------------------------
 class GanBert():
+    '''
+    The ganbert model used a generator to produces “fake” examples resembling the data distribution and a discriminator to
+    distinguish samples of the generator from the real instances.. 
+    The bert model is used as discriminator. 
+    '''
     def __init__(self,batch_size=64,max_seq_length = 64,num_hidden_layers_g = 1,
                     num_hidden_layers_d =1,noise_size = 100,out_dropout_rate = 0.2,
                     apply_balance = True,learning_rate_discriminator = 5e-5,learning_rate_generator = 5e-5,
