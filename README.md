@@ -38,10 +38,10 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
       It is very important that the names are exactly as written, on the specified form.
       
 2. Generate results for the different datasets by:
-   1. Running Bert.ipynb for the baseline results.     
-   2. Running GanBert.ipynb for the Gan-Bert results.
-   3. Running Lambada.ipynb for the Lambada results.     
-   Each notebook will have a variable you need to change in order to point it to the correct dataset. This will have to be changed manually.
+   - Running Bert.ipynb for the baseline results.     
+   - Running GanBert.ipynb for the Gan-Bert results.
+   - Running Lambada.ipynb for the Lambada results.     
+   - Note that each notebook will have a variable you need to change in order to point it to the correct dataset. This will have to be changed manually.
   
 3. Run Results.ipynb to concatenate the results and save them to a single .csv file along with a plot. They can now be compared.
 
