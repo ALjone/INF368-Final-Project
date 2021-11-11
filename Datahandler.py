@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 import re
-
+from sklearn.model_selection import train_test_split
 
 class Get_IMDB_data():
     
@@ -103,6 +103,40 @@ class Get_IMDB_data():
                 data = data.append(row, ignore_index=True)
 
         return data
+
+
+class Get_medical_data():
+    def __init__(self,from_path,to_path,random_state):
+        self.path = from_path
+        self.to_path = to_path
+        self.random_state = random_state
+    
+    def create_datasets(self,labeled_size=[5,10,25,50],unlabeled_size= 500,test_size=500):
+        labeled = pd.read_table(self.path+"/train.dat",sep = "\t",header =None,names =["label", "text"])
+        labeled = labeled[[ "text","label"]]
+        unlabeled = pd.read_table(self.path+"/test.dat",sep = "\t",header =None,names =["text"])
+        unlabeled["label"] = "blank"
+
+        unlabeled,_ = train_test_split(unlabeled,train_size = unlabeled_size/unlabeled.shape[0], random_state= 0)
+        unlabeled =unlabeled.copy()
+        test = pd.DataFrame(columns=["text","label"])
+        for i in labeled_size:
+            train = pd.DataFrame(columns=["text","label"])  
+            for label in labeled.label.unique():
+                train = pd.concat([train, labeled[labeled.label==label].iloc[-i:]], ignore_index=True)
+                train = train.sample(frac=1, random_state=0).reset_index(drop=True)
+                train.to_csv(f"{self.to_path}/train_labeled_{i}.csv",index=False)
+
+        for label in labeled.label.unique():
+            test = pd.concat([test, labeled[labeled.label==label].iloc[:100]], ignore_index=True)
+            test = test.sample(frac=1, random_state=0).reset_index(drop=True)
+        test.to_csv(self.to_path+"/test.csv",index=False)
+        unlabeled.to_csv(self.to_path+"/train_unlabeled_.csv",index=False)
+        
+    
+        
+
+    
 
 if __name__ == "__main__":
     

@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 
 tf.get_logger().setLevel('ERROR')
 
+#https://www.tensorflow.org/text/tutorials/classify_text_with_bert#about_bert
 
 class Bert:
    
@@ -183,26 +184,34 @@ class Bert:
   def plot_model(self):
     return tf.keras.utils.plot_model(self.model)
 
-  def __data_preprocessing(self,data,batch_size):
-    self.class_names = pd.factorize(data.label)[1]
-    data.label = pd.factorize(data.label)[0]
+  def __data_preprocessing(self,data,batch_size, training = True):
+    if training:
+        self.label_map = {}
+        for i,label in enumerate(data.label.unique()):
+            self.label_map[i] = label
+    
+    for number,label in self.label_map.items():
+        data.label[data.label==label] = number
+    
+    data.label = data.label.astype("int32")
+    
     nrow = data.shape[0]
     data = tf.data.Dataset.from_tensor_slices((data.text, data.label))
     if self.random_state is not None:
-      data = data.shuffle(nrow,self.random_state)
+        data = data.shuffle(nrow*2,self.random_state)
     else:
-      data = data.shuffle(nrow)
+        data = data.shuffle(nrow*2)
     data = data.batch(batch_size)
     data = data.cache().prefetch(buffer_size=tf.data.AUTOTUNE)
     return data
 
-  def from_path_data_preprocessing(self,path,batch_size):
+  def from_path_data_preprocessing(self,path,batch_size,training = True):
 
     data = pd.read_csv(path)
 
-    return self.__data_preprocessing(data,batch_size)
+    return self.__data_preprocessing(data,batch_size,training=training)
 
-  def data_preprocessing(self,X,y,batch_size):
+  def data_preprocessing(self,X,y,batch_size,training = True):
     if isinstance(X, np.ndarray):
       X =pd.DataFrame(X)
     if isinstance(y, np.ndarray):
@@ -212,7 +221,7 @@ class Bert:
     data.columns = ["text","label"]
 
     
-    return self.__data_preprocessing(data,batch_size)
+    return self.__data_preprocessing(data,batch_size,training = training)
 
 
   def __train(self,data,learning_rate,batch_size = 64,epochs=10):
@@ -224,6 +233,7 @@ class Bert:
     steps_per_epoch = tf.data.experimental.cardinality(data).numpy()
     num_train_steps = steps_per_epoch * epochs
     num_warmup_steps = int(0.1*num_train_steps)
+
 
     optimizer = optimization.create_optimizer(init_lr=learning_rate,
                                               num_train_steps=num_train_steps,
@@ -267,11 +277,11 @@ class Bert:
     return self.__predict_proba(X,batch_size=batch_size).argmax(axis=-1)
   
   def evaluate_from_path(self,path):
-    test = self.from_path_data_preprocessing (path=path,batch_size = 1)
+    test = self.from_path_data_preprocessing (path=path,batch_size = 1, training = False)
     return self.model.evaluate(test)
 
   def evaluate(self,data):
-    test = self.__data_preprocessing(data,batch_size=1)
+    test = self.__data_preprocessing(data,batch_size=1, training = False)
     return self.model.evaluate(test)
 
 
