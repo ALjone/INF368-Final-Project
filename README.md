@@ -1,5 +1,5 @@
 # INF368-Final-Project
-Final project for INF368
+This was made for a final project for INF368 at the University of Bergen. We replicate two models, GanBert and LAMBADA, based on the papers below. These are generative models that help in low-data situations. GanBert uses unlabeled data while LAMBADA synthesizes its own data based on GPT2. These are then used to try to improve classification performance on the IMDB dataset and the Medical Text dataset. We then compare the results to a baseline using a BERT classifier. 
 
 ## Papers
 - [Do Not Have Enough Data? Deep Learning to the Rescue!](https://arxiv.org/pdf/1911.03118.pdf)
