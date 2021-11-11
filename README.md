@@ -23,11 +23,8 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
       - These four files each one column called text with the text, and a column with labels called label. The number at the end indicates the number of datapoints per label:
             
             - train_labeled_5.csv
-      
             - train_labeled_10.csv
-      
             - train_labeled_25.csv
-      
             - train_labeled_50.csv
       
       - The unlabeled data must also have two columns, text and label. The label should be blank, although it doesn't really matter as long as it exists:
