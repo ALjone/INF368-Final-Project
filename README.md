@@ -45,6 +45,9 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
   
 3. Run Results.ipynb to concatenate the results and save them to a single .csv file along with a plot. They can now be compared.
 
+## Possible improvements and future research
+- Sample different (10?) datasets of size 5 per label and look at variance of the results
+
 ## Sources
 - https://github.com/mcelikkaya/medium_articles/blob/main/gtp2_training.ipynb
 - https://github.com/crux82/ganbert-pytorch
