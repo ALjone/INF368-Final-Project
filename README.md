@@ -21,21 +21,21 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
 ## How to run the analysis
 1. Get the data. IMBD and Medical Text are already supplied, but if you wish to use other datasets, you need to generate the required files yourself. The required files are six different files that should all be in data/YourDatasetName/. These are on the form of:
       - These four files each one column called text with the text, and a column with labels called label. The number at the end indicates the number of datapoints per label:
-      - train_labeled_5.csv
+            - train_labeled_5.csv
       
-      train_labeled_10.csv
+            -train_labeled_10.csv
       
-      train_labeled_25.csv
+            -train_labeled_25.csv
       
-      train_labeled_50.csv
+            -train_labeled_50.csv
       
-      The unlabeled data must also have two columns, text and label. The label should be blank, although it doesn't really matter as long as it exists:
+      -The unlabeled data must also have two columns, text and label. The label should be blank, although it doesn't really matter as long as it exists:
       
-      train_unlabeled.csv
+            -train_unlabeled.csv
       
-      The test data should also be on the form of two columns, text and label. 
+      -The test data should also be on the form of two columns, text and label. 
       
-      test.csv
+            -test.csv
       
       It is very important that the names are exactly as written, on the specified form.
       
