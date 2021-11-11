@@ -8,6 +8,7 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
 
 ## Data
 [IMDB data set](http://ai.stanford.edu/~amaas/data/sentiment/) contains 50,000 documents with 2 categories.
+[IMDB data set](https://www.kaggle.com/chaitanyakck/medical-text) contains 14438 documents with 5 categories.
 
 ## Setup
 | variable  | value   |
