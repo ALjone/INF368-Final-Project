@@ -138,7 +138,7 @@ class Get_medical_data():
         unlabeled = unlabeled.copy()
         unlabeled["label"] = "blank"
         test.to_csv(self.to_path+"/test.csv",index=False)
-        unlabeled.to_csv(self.to_path+"/train_unlabeled_.csv",index=False)
+        unlabeled.to_csv(self.to_path+"/train_unlabeled.csv",index=False)
         
     
         
