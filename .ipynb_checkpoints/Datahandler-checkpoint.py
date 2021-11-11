@@ -133,12 +133,12 @@ class Get_medical_data():
             test = test.sample(frac=1, random_state=0).reset_index(drop=True)
             
             unlabeled = pd.concat([unlabeled, labeled[labeled.label==label].iloc[100:(100+1000)]], ignore_index=True)
-            unlabeled = test.sample(frac=1, random_state=0).reset_index(drop=True)
+            unlabeled = unlabeled.sample(frac=1, random_state=0).reset_index(drop=True)
             
         unlabeled = unlabeled.copy()
         unlabeled["label"] = "blank"
         test.to_csv(self.to_path+"/test.csv",index=False)
-        unlabeled.to_csv(self.to_path+"/train_unlabeled_.csv",index=False)
+        unlabeled.to_csv(self.to_path+"/train_unlabeled.csv",index=False)
         
     
         
