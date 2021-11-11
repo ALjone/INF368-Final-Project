@@ -27,7 +27,7 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
             - train_labeled_25.csv
             - train_labeled_50.csv
       
-      - The unlabeled data must also have two columns, text and label. The label should be blank, although it doesn't really matter as long as it exists:
+      - The unlabeled data must also have two columns, text and label. The label should be "blank" or another another word indicating it is unlabeled, although it doesn't really matter as long as it exists:
       
             - train_unlabeled.csv
       
