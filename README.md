@@ -15,7 +15,7 @@ Robust Text Classification with a Bunch of Labeled Examples](https://aclantholog
 |---|---|
 | # per label  | 5, 10, 25, 50  |
 | batch size  |  5 |
-| learning rate |  5e-4 |
+| learning rate |  5e-5 |
 | seed  | 0  |
 
 ## How to run the analysis
