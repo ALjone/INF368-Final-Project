@@ -89,7 +89,7 @@ class GPT2Tuner:
         self.model.to(device)
 
 
-    def __clean_data(self, data_path: str) -> Tuple(List(str), List(str)):
+    def __clean_data(self, data_path: str):
         """Cleans the data in the way specified in the cleaning list when initializing the tuner. 
         
         Parameters:
@@ -106,7 +106,8 @@ class GPT2Tuner:
         #We give it the label, say start of sequence, give it the sequence, and then the end of the sequence
         #GPT2 takes only 1024 tokens, so we limit the text to 1021
         for text, label in zip(df.iloc[:,0], df.iloc[:,1]):
-            sequences.append(str(label) + self.bos + str(text).split()[:1021] + self.eos)
+            label = str(label)
+            sequences.append(str(label) + self.bos + ' '.join(str(text).split()[:1021]) + self.eos)
             labels.append(label)
         
         #Clean the sequences
@@ -176,7 +177,7 @@ class GPT2Tuner:
         self.model.eval()
         for label in self.labels:
             #We feed it label + start of sequence
-            input_seq = label + " " + self.bos
+            input_seq = str(label) + " " + self.bos
             generated = torch.tensor(self.tokenizer.encode(input_seq)).unsqueeze(0)
             generated = generated.to(self.device)
             sample_outputs = self.model.generate(
@@ -192,8 +193,11 @@ class GPT2Tuner:
                 for sample_output in sample_outputs:
                     #Do this weird hack so that we are guaranteed label + space at the start of the sequence, so we can get the label easily
                     #later
-                    seq = label + " " + self.tokenizer.decode(sample_output, skip_special_tokens=True).replace("\n", "")[len(label):]
-                    f.write(seq+"\n")
+                    seq = str(label) + " " + self.tokenizer.decode(sample_output, skip_special_tokens=True).replace("\n", "")[len(str(label)):]
+                    #Only save files that have atleast 10 characters. Otherwise a lot of empty sentences will be saved
+                    #in some cases
+                    if len(seq[len(str(label))+1:]) > 10: 
+                        f.write(seq+"\n")
 
 
 if __name__ == '__main__':
