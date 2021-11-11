@@ -21,16 +21,17 @@ class Get_IMDB_data():
 
       return labeled, unlabeled, test
 
-    def create_datasets(self, labeled_size = 100,unlabeled_size = 5000,test_size = 500):
+    
+    def create_datasets(self, path_to, labeled_size = 100,unlabeled_size = 5000,test_size = 500):
 
-      labeled,unlabeled,test = self.get_data(labeled_size,unlabeled_size,test_size)
-      
-      unlabeled = unlabeled.copy()
-      unlabeled.loc[:,"label"] = "blank"
-      for k,v in labeled.items():
-        v.to_csv(f"data/train_labeled_{k}.csv",index=False)
-      unlabeled.to_csv("data/train_unlabeled.csv",index=False)
-      test.to_csv("data/test.csv",index=False)
+        labeled,unlabeled,test = self.get_data(labeled_size,unlabeled_size,test_size)
+
+        unlabeled = unlabeled.copy()
+        unlabeled.loc[:,"label"] = "blank"
+        for k,v in labeled.items():
+            v.to_csv(f"{path_to}/train_labeled_{k}.csv",index=False)
+        unlabeled.to_csv(f"{path_to}/train_unlabeled.csv",index=False)
+        test.to_csv(f"{path_to}/test.csv",index=False)
 
         
     
@@ -111,15 +112,15 @@ class Get_medical_data():
         self.to_path = to_path
         self.random_state = random_state
     
-    def create_datasets(self,labeled_size=[5,10,25,50],unlabeled_size= 500,test_size=500):
+    def create_datasets(self,labeled_size=[5,10,25,50]):
         labeled = pd.read_table(self.path+"/train.dat",sep = "\t",header =None,names =["label", "text"])
         labeled = labeled[[ "text","label"]]
-        unlabeled = pd.read_table(self.path+"/test.dat",sep = "\t",header =None,names =["text"])
-        unlabeled["label"] = "blank"
+ 
 
-        unlabeled,_ = train_test_split(unlabeled,train_size = unlabeled_size/unlabeled.shape[0], random_state= 0)
-        unlabeled =unlabeled.copy()
+
+     
         test = pd.DataFrame(columns=["text","label"])
+        unlabeled = pd.DataFrame(columns=["text","label"])  
         for i in labeled_size:
             train = pd.DataFrame(columns=["text","label"])  
             for label in labeled.label.unique():
@@ -130,6 +131,12 @@ class Get_medical_data():
         for label in labeled.label.unique():
             test = pd.concat([test, labeled[labeled.label==label].iloc[:100]], ignore_index=True)
             test = test.sample(frac=1, random_state=0).reset_index(drop=True)
+            
+            unlabeled = pd.concat([unlabeled, labeled[labeled.label==label].iloc[100:(100+1000)]], ignore_index=True)
+            unlabeled = test.sample(frac=1, random_state=0).reset_index(drop=True)
+            
+        unlabeled = unlabeled.copy()
+        unlabeled["label"] = "blank"
         test.to_csv(self.to_path+"/test.csv",index=False)
         unlabeled.to_csv(self.to_path+"/train_unlabeled_.csv",index=False)
         
@@ -142,6 +149,7 @@ if __name__ == "__main__":
     
     if not os.path.exists('data'):
       os.mkdir("./data")
+    
       url = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
       import tensorflow as tf
       dataset = tf.keras.utils.get_file('aclImdb_v1.tar.gz', url,
