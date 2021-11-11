@@ -14,12 +14,14 @@ from transformers import GPT2Tokenizer
 from torch.utils.data import Dataset 
 import gc
 
+#NB! Inspiration for the code, as well as some whole lines, are taken from this notebook.
+#It is part of a medium.com article
+#https://github.com/mcelikkaya/medium_articles/blob/main/gtp2_training.ipynb
 class customDataset(Dataset):
 
     def __init__(self, sentences, tokenizer: GPT2Tokenizer, max_length=1024):
 
         self.tokenizer = tokenizer 
-        #TODO torch tensor instead?
         self.input_ids = []
         self.attn_masks = []
 
@@ -38,25 +40,47 @@ class customDataset(Dataset):
 
 
 class GPT2Tuner:
-    def __init__(self, data_path, device = "cpu", batch_size: int = 4, bos: str = '<bos>',
+    """A wrapper for the GPT2 model taht allows the user to fine-tune it on a dataset and then generate sentences."""
+    def __init__(self, data_path: str, device: str = "cpu", batch_size: int = 4, bos: str = '<bos>',
                 eos: str = '<eos>', pad: str = '<pad>', cleaning: List = ["\r", "\n", "<br />"]) -> None:
+        """Parameter:
+            data_path(str): The path to where the training data is. Expects a .csv file
+            
+            device(str): Use "cuda" for GPU-training and "cpu" for CPU training.
+            
+            batch_size(int): The batch size to be used during training.
+            
+            bos(str): A token that symbolizes the begining of a sentence.
+            
+            eos(str): A token that symbolizes the end of a sentence.
+            
+            pad(str): A token that symbolizes a padding. Used at the end of a document to fulfill GPT2's requirement for 
+            1024 tokens.
+            
+            cleaning(List): A list of words, symbols, characters to be removed from the document. """
         self.cleaning = cleaning
         self.bos = bos
         self.eos = eos
         self.pad = pad
 
+        #Initialize the tokenizer to tokenize our sentences
         self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2', bos_token=bos, eos_token=eos, pad_token=pad)
+        #Clean the data from the .csv file
         self.sentences, self.labels = self.__clean_data(data_path)
 
+        #The max length of any of the sentencs in the dataset, used for setting the length in the dataset
         self.max_len = max([len(self.tokenizer.encode(s)) for s in self.sentences])
         
-        #1024 is the max size for GPT2
+        #Create a new dataset-object for training. 1024 is the max size for GPT2
         self.dataset = customDataset(self.sentences, self.tokenizer, max_length=min(self.max_len, 1024))
 
+        #Create a dataloader for easy training
         self.train_dataloader = DataLoader(self.dataset,  sampler = RandomSampler(self.dataset), batch_size = batch_size)    
+
 
         self.configuration = GPT2Config.from_pretrained('gpt2', output_hidden_states=False)
 
+        #Load the GPT2 model and resize its embeddings
         self.model = GPT2LMHeadModel.from_pretrained("gpt2", config=self.configuration)
         self.model.resize_token_embeddings(len(self.tokenizer))
 
@@ -65,31 +89,60 @@ class GPT2Tuner:
         self.model.to(device)
 
 
-    def __clean_data(self, data_path):
+    def __clean_data(self, data_path: str):
+        """Cleans the data in the way specified in the cleaning list when initializing the tuner. 
+        
+        Parameters:
+            data_path(str): The path to the data. Excepts a .csv file
+            
+        Returns:
+            sentences(List): A list with all the cleaned sentences.
+            labels(List): A list containing the unique labels."""
         sentences = []
         labels = []
         df = pd.read_csv(data_path)
-        for text, label in zip(df.iloc[:,0], df.iloc[:,1]):
-            sentences.append(str(label) + self.bos + str(text) + self.eos)
-            labels.append(label)
 
+        #Turn the sentences into the correct format to pass into GPT2.
+        #We give it the label, say start of sequence, give it the sentence, and then the end of the sequence
+        #GPT2 takes only 1024 tokens, so we limit the text to 1021
+        for text, label in zip(df.iloc[:,0], df.iloc[:,1]):
+            sentences.append(str(label) + self.bos + str(text).split()[:1021] + self.eos)
+            labels.append(label)
+        
+        #Clean the sentences
         for cleaning in self.cleaning:
             sentences = [s.replace(cleaning, "") for s in sentences]
 
         return sentences, list(set(labels))
 
 
-    def __format_time(self, elapsed):
+    def __format_time(self, elapsed: int):
+        """Format the time to a pretty format.
+        Parameters:
+            elapsed(int): The elapsed time.
+        Returns:
+            A string representing the time"""
         return str(datetime.timedelta(seconds=int(round((elapsed)))))
 
-    def __process_one_batch(self, batch):
+    def __process_one_batch(self, batch: customDataset):
+        """Takes in a batch, processes it, and returns the results from the model.
+        Parameters:
+            batch(customDataset): A data point (or multiple.
+            
+        Returns:
+            The outputs of the model"""
         b_input_ids = batch[0].to(self.device)
         b_labels = batch[0].to(self.device)
         b_masks = batch[1].to(self.device)
         outputs  = self.model(b_input_ids,  attention_mask = b_masks, labels=b_labels)
         return outputs
 
-    def train(self, epochs):
+    def train(self, epochs: int):
+        """Fine tune the GPT2 model.
+        Parameters:
+            epochs(int): The number of epochs to train for"""
+
+        #Collect the data because this takes so much data
         gc.collect()
 
         self.model.train()
